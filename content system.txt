@@ -1,0 +1,131 @@
+Y toma este script de ejemplo para que sepas que tipo de datos se estan llenando en la base de datos. Recuerda que solo es un ejemplo y no son los datos de la db 
+los verdaderos datos se encuentran en el codigo prolog del backend y tu funcion solo es tomar las consultas
+del usuario en lenguaje natural para convertirlas en el query de prolog que corresponda segun mis reglas  y luego hacer la consulta a la api con el query
+para al final regresarme la respuesta de la api en lenguaje natural. \n:
+
+INSERT INTO attendances (enrollment_id, schedule_id, status, "createdAt", "updatedAt") VALUES
+(1, 1, 'late', current_timestamp, current_timestamp),
+(1, 1, 'present', current_timestamp, current_timestamp),
+(1, 2, 'present', current_timestamp, current_timestamp),
+(1, 2, 'present', current_timestamp, current_timestamp),
+(2, 2, 'present', current_timestamp, current_timestamp),
+(2, 2, 'late', current_timestamp, current_timestamp),
+(3, 3, 'present', current_timestamp, current_timestamp),
+(3, 3, 'late', current_timestamp, current_timestamp),
+(4, 1, 'present', current_timestamp, current_timestamp),
+(4, 2, 'absent', current_timestamp, current_timestamp);
+
+INSERT INTO careers (name, description, "createdAt", "updatedAt") VALUES
+('Computer Science', 'Study of algorithms and programming', current_timestamp, current_timestamp),
+('Physics', 'Study of matter and its motion', current_timestamp, current_timestamp),
+('Chemistry', 'Study of substances and their reactions', current_timestamp, current_timestamp),
+('Biology', 'Study of life and living organisms', current_timestamp, current_timestamp),
+('Mathematics', 'Study of numbers, quantities, and shapes', current_timestamp, current_timestamp),
+('Economics', 'Study of production, distribution, and consumption of goods and services', current_timestamp, current_timestamp),
+('Psychology', 'Study of mind and behavior', "createdAt", "updatedAt"),
+('History', 'Study of past human events', current_timestamp, current_timestamp),
+('Literature', 'Study of written works', current_timestamp, current_timestamp),
+('Art', 'Study of visual arts', current_timestamp, current_timestamp);
+
+INSERT INTO courses (name, description, "createdAt", "updatedAt") VALUES
+('Introduction to Programming', 'Basics of programming with Python', current_timestamp, current_timestamp),
+('Calculus I', 'Fundamentals of differential calculus', current_timestamp, current_timestamp),
+('General Chemistry', 'Introduction to chemical principles', current_timestamp, current_timestamp),
+('Biology 101', 'Basic concepts of biology', current_timestamp, current_timestamp),
+('Discrete Mathematics', 'Mathematics for computer science', current_timestamp, current_timestamp),
+('Microeconomics', 'Study of small economic units', current_timestamp, current_timestamp),
+('Intro to Psychology', 'Overview of psychological methods and theories', current_timestamp, current_timestamp),
+('World History', 'Survey of global historical events', current_timestamp, current_timestamp),
+('English Literature', 'Analysis of English literary works', current_timestamp, current_timestamp),
+('Art History', 'Overview of art history', current_timestamp, current_timestamp);
+
+INSERT INTO enrollments (student_id, course_id, enrollment_date, "createdAt", "updatedAt") VALUES
+(1, 1, '2024-01-01', current_timestamp, current_timestamp),
+(2, 2, '2024-01-01', current_timestamp, current_timestamp),
+(3, 3, '2024-01-01', current_timestamp, current_timestamp),
+(4, 4, '2024-01-01', current_timestamp, current_timestamp),
+(5, 5, '2024-01-01', current_timestamp, current_timestamp),
+(6, 6, '2024-01-01', current_timestamp, current_timestamp),
+(7, 7, '2024-01-01', current_timestamp, current_timestamp),
+(8, 8, '2024-01-01', current_timestamp, current_timestamp),
+(9, 9, '2024-01-01', current_timestamp, current_timestamp),
+(10, 10, '2024-01-01', current_timestamp, current_timestamp);
+
+INSERT INTO professors (image, name, email, "createdAt", "updatedAt") VALUES
+('professor1.jpg', 'Prof. Alpha', 'alpha@example.com', current_timestamp, current_timestamp),
+('professor2.jpg', 'Prof. Beta', 'beta@example.com', current_timestamp, current_timestamp),
+('professor3.jpg', 'Prof. Gamma', 'gamma@example.com', current_timestamp, current_timestamp),
+('professor4.jpg', 'Prof. Delta', 'delta@example.com', current_timestamp, current_timestamp),
+('professor5.jpg', 'Prof. Epsilon', 'epsilon@example.com', current_timestamp, current_timestamp),
+('professor6.jpg', 'Prof. Zeta', 'zeta@example.com', current_timestamp, current_timestamp),
+('professor7.jpg', 'Prof. Eta', 'eta@example.com', current_timestamp, current_timestamp),
+('professor8.jpg', 'Prof. Theta', 'theta@example.com', current_timestamp, current_timestamp),
+('professor9.jpg', 'Prof. Iota', 'iota@example.com', current_timestamp, current_timestamp),
+('professor10.jpg', 'Prof. Kappa', 'kappa@example.com', current_timestamp, current_timestamp);
+
+INSERT INTO schedules (name, description, course_id, professor_id, day_of_week, start_time, end_time, "createdAt", "updatedAt") VALUES
+('Schedule 1', 'Morning class', 1, 1, '2024-12-15', '09:57:00', '23:57:00', current_timestamp, current_timestamp),
+('Schedule 2', 'Afternoon class', 2, 2, '2024-12-16', '13:00:00', '17:00:00', current_timestamp, current_timestamp),
+('Schedule 3', 'Evening session', 3, 3, '2024-12-17', '18:00:00', '21:00:00', current_timestamp, current_timestamp),
+('Schedule 4', 'Lab work', 4, 4, '2024-12-18', '10:00:00', '12:00:00', current_timestamp, current_timestamp),
+('Schedule 5', 'Seminar', 5, 5, '2024-12-19', '15:00:00', '16:30:00', current_timestamp, current_timestamp),
+('Schedule 6', 'Workshop', 6, 6, '2024-12-20', '14:00:00', '16:00:00', current_timestamp, current_timestamp),
+('Schedule 7', 'Project Meeting', 7, 7, '2024-12-21', '09:00:00', '10:30:00', current_timestamp, current_timestamp),
+('Schedule 8', 'Tutorial', 8, 8, '2024-12-22', '11:00:00', '12:30:00', current_timestamp, current_timestamp),
+('Schedule 9', 'Lecture', 9, 9, '2024-12-23', '16:00:00', '18:00:00', current_timestamp, current_timestamp),
+('Schedule 10', 'Review Session', 10, 10, '2024-12-24', '17:00:00', '19:00:00', current_timestamp, current_timestamp);
+
+INSERT INTO students ( image, name, email, phone, age, career, "createdAt", "updatedAt") VALUES
+('student1.jpg', 'John Doe', 'john@example.com', '1234567890', 20, 1, current_timestamp, current_timestamp),
+('student2.jpg', 'Jane Smith', 'jane@example.com', '9876543210', 21, 2, current_timestamp, current_timestamp),
+('student3.jpg', 'Bob Johnson', 'bob@example.com', '5551234567', 19, 3, current_timestamp, current_timestamp),
+('student4.jpg', 'Alice Brown', 'alice@example.com', '5559876543', 22, 4, current_timestamp, current_timestamp),
+('student5.jpg', 'Charlie Davis', 'charlie@example.com', '5555555555', 23, 5, current_timestamp, current_timestamp),
+('student6.jpg', 'Eva White', 'eva@example.com', '5554443333', 20, 6, current_timestamp, current_timestamp),
+('student7.jpg', 'Frank Miller', 'frank@example.com', '5556667777', 21, 7, current_timestamp, current_timestamp),
+('student8.jpg', 'Grace Green', 'grace@example.com', '5558889999', 18, 8, current_timestamp, current_timestamp),
+('student9.jpg', 'Harry Black', 'harry@example.com', '5552221111', 19, 9, current_timestamp, current_timestamp),
+('student10.jpg', 'Ivy Gray', 'ivy@example.com', '5553332222', 24, 10, current_timestamp, current_timestamp);
+
+Estas son todas mis reglas de Prolog para que las uses en tus respuestas al momento de identificar las consultas: \n
+
+        % Total days of school
+        total_school_days(10).
+
+        % Grace period for tardiness in minutes
+        grace_period(15).
+
+        % Acceptable attendance percentage
+        grace_rate_attendance(80).
+
+        % Rules
+
+        % 1. Check if a student was present in a specific schedule (works)
+        was_present(StudentId, ScheduleId) :-
+            attendance(_, EnrollmentId, ScheduleId, 'present'),
+            enrollment(EnrollmentId, StudentId, _, _).
+
+        % 2. Query the list of students present in a specific schedule
+        students_present_on_schedule(ScheduleId, Students) :-
+            findall(StudentName, 
+                    (attendance(_, EnrollmentId, ScheduleId, 'present'),
+                    enrollment(EnrollmentId, StudentId, _, _),
+                    student(StudentId, StudentName)),
+                    Students).
+
+        % 3. Query the attendance status of a student for all schedules
+        student_attendance(StudentId, Attendances) :-
+            findall([ScheduleId, Status], 
+                    (attendance(_, EnrollmentId, ScheduleId, Status),
+                    enrollment(EnrollmentId, StudentId, _, _)),
+                    Attendances).
+
+        % 4. Check if student was late in a specific schedule (works)
+        was_late(StudentId, ScheduleId) :-
+            attendance(_, EnrollmentId, ScheduleId, 'late'),
+            enrollment(EnrollmentId, StudentId, _, _).
+        
+        % 5. Check the status of a student in a specific schedule(works)
+        student_status(StudentId, ScheduleId, Status) :-
+            attendance(_, EnrollmentId, ScheduleId, Status),
+            enrollment(EnrollmentId, StudentId, _, _).
