@@ -5,6 +5,23 @@ const axios = require('axios')
 // Obtener la clave de API desde el archivo .env
 const apiKey = process.env.CHATBOT_GROK_KEY
 
+// Definimos la lista de consultas Prolog válidas
+const prologQueries = [
+  'student',
+  'career',
+  'attendance',
+  'enrollment',
+  'schedule',
+  'total_school_days',
+  'grace_period',
+  'grace_rate_attendance',
+  'was_present',
+  'students_present_on_schedule',
+  'student_attendance',
+  'was_late',
+  'student_status',
+]
+
 // Función para consultar la API de Prolog
 async function lookupProlog(prologQuery) {
   try {
@@ -22,6 +39,25 @@ async function lookupProlog(prologQuery) {
     console.error('Error al consultar Prolog:', error.message)
     throw error
   }
+}
+
+// Función para encontrar una consulta Prolog válida en la cadena query
+function extractPrologQuery(query, prologQueries) {
+  for (let i = 0; i < prologQueries.length; i++) {
+    const queryStart = query.indexOf(prologQueries[i])
+    if (queryStart !== -1) {
+      let start = queryStart
+      let end = query.indexOf('.', start) + 1 // +1 para incluir el punto final
+
+      if (end > start) {
+        let potentialQuery = query.slice(start, end).trim()
+        if (potentialQuery[potentialQuery.length - 1] === '.') {
+          return potentialQuery
+        }
+      }
+    }
+  }
+  return null // Si no encontramos una consulta válida
 }
 
 // URL de la API de Grok (ajusta según la documentación oficial)
@@ -89,10 +125,22 @@ POSIBLES CONSULTAS PROLOG:
         % 5. Check the status of a student in a specific schedule(works); primer parametro es el id del estudiante, el segundo parametro es el id del horario y el tercer parametro es el estado del estudiante en ese horario
         student_status(StudentId, ScheduleId, Status).
 
+        En resumen todas las posibles consultas son estas:
+        'student',
+        'career',
+        'attendance',
+        'enrollment',
+        'schedule',
+        'total_school_days',
+        'grace_period',
+        'grace_rate_attendance',
+        'was_present',
+        'students_present_on_schedule',
+        'student_attendance',
+        'was_late',
+        'student_status'
+
 Las consultas que envies a la API Prolog siempre deben ser en lenguaje Prolog, por ejemplo, "El estudiante con el id 2 llego tarde al horario con id 3" y debe detectar la consulta o codigo prolog adecuado, segun el codigo prolog que le di que en este caso podria ser "was_present(studentId, scheduleId)." NUNCA debes enviar mas texto al API prolog, considera que todo lo que se envie al API Prolog debe ser una consulta prolog valida que si se envia un texto o cualquier cosa que nosea consulta prolog valida habra un error.
-
-
-
 `
 
 // Función para hacer una solicitud a Grok
@@ -124,24 +172,26 @@ async function callGrok(query) {
     const grokResponse = response.data.choices[0].message.content
     console.log('Respuesta de Grok:', grokResponse)
 
-    // Identificar el query de Prolog de la respuesta de Grok
-    const prologQueryMatch = grokResponse.match(/`([^`]+)`/)
-    if (prologQueryMatch && prologQueryMatch[1]) {
-      const prologQuery = prologQueryMatch[1]
-      console.log('Consulta Prolog identificada:', prologQuery)
+    // Identificar y extraer la consulta Prolog de la respuesta de Grok
+    const prologQueryFound = extractPrologQuery(grokResponse, prologQueries)
+
+    if (prologQueryFound) {
+      console.log('Consulta Prolog identificada:', prologQueryFound)
 
       // Realizar la consulta a la API de Prolog
-      const prologResult = await lookupProlog(prologQuery)
+      const prologResult = await lookupProlog(prologQueryFound)
 
       // Interpretar y convertir la respuesta de Prolog a lenguaje natural
       let naturalLanguageResponse = interpretPrologResult(
-        prologQuery,
+        prologQueryFound,
         prologResult
       )
       console.log('Respuesta en lenguaje natural:', naturalLanguageResponse)
       return naturalLanguageResponse
     } else {
-      console.log('No se pudo identificar una consulta de Prolog válida.')
+      console.log(
+        'No se pudo identificar una consulta de Prolog válida en la respuesta de Grok.'
+      )
       return 'No se pudo entender tu consulta.'
     }
   } catch (error) {
@@ -181,6 +231,5 @@ function interpretPrologResult(query, result) {
 }
 
 // Ejemplo de uso
-const userQuery =
-  'Hola Grok, ¿puedes decirme cual es el id del estudiante con el nombre John Doe?'
+const userQuery = 'Hola Grok, ¿puedes decirme que los estudiantes que hay?'
 callGrok(userQuery).then(console.log)
