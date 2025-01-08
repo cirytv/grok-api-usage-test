@@ -1,9 +1,17 @@
-// Importar las librerías necesarias
-require('dotenv').config()
-const axios = require('axios')
+import OpenAI from 'openai'
+import axios from 'axios'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // Obtener la clave de API desde el archivo .env
-const apiKey = process.env.CHATBOT_GROK_KEY
+const apiKey = process.env.OPENAI_API_KEY
+const prologApiUrl = 'http://localhost:4000/api/prolog/query'
+
+// Inicializar el cliente OpenAI
+const openai = new OpenAI({
+  apiKey,
+})
 
 // Definimos la lista de consultas Prolog válidas
 const prologQueries = [
@@ -22,46 +30,6 @@ const prologQueries = [
   'student_status',
 ]
 
-// Función para consultar la API de Prolog
-async function lookupProlog(prologQuery) {
-  try {
-    const res = await axios.post(
-      'http://localhost:4000/api/prolog/query',
-      { query: prologQuery },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    return res.data // Suponiendo que tu API devuelve los datos en 'response'
-  } catch (error) {
-    console.error('Error al consultar Prolog:', error.message)
-    throw error
-  }
-}
-
-// Función para encontrar una consulta Prolog válida en la cadena query
-function extractPrologQuery(query, prologQueries) {
-  for (let i = 0; i < prologQueries.length; i++) {
-    const queryStart = query.indexOf(prologQueries[i])
-    if (queryStart !== -1) {
-      let start = queryStart
-      let end = query.indexOf('.', start) + 1 // +1 para incluir el punto final
-
-      if (end > start) {
-        let potentialQuery = query.slice(start, end).trim()
-        if (potentialQuery[potentialQuery.length - 1] === '.') {
-          return potentialQuery
-        }
-      }
-    }
-  }
-  return null // Si no encontramos una consulta válida
-}
-
-// URL de la API de Grok (ajusta según la documentación oficial)
-const grokUrl = 'https://api.x.ai/v1/chat/completions'
 const systemContent = `
 Eres un asistente que ayuda a resolver dudas sobre la asistencia de alumnos.
 
@@ -143,62 +111,19 @@ POSIBLES CONSULTAS PROLOG:
 Las consultas que envies a la API Prolog siempre deben ser en lenguaje Prolog, por ejemplo, "El estudiante con el id 2 llego tarde al horario con id 3" y debe detectar la consulta o codigo prolog adecuado, segun el codigo prolog que le di que en este caso podria ser "was_present(studentId, scheduleId)." NUNCA debes enviar mas texto al API prolog, considera que todo lo que se envie al API Prolog debe ser una consulta prolog valida que si se envia un texto o cualquier cosa que nosea consulta prolog valida habra un error.
 `
 
-// Función para hacer una solicitud a Grok
-async function callGrok(query) {
+// Función para consultar la API de Prolog
+async function lookupProlog(prologQuery) {
   try {
     const response = await axios.post(
-      grokUrl,
+      prologApiUrl,
+      { query: prologQuery },
       {
-        model: 'grok-beta',
-        messages: [
-          {
-            role: 'system',
-            content: systemContent,
-          },
-          {
-            role: 'user',
-            content: query,
-          },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       }
     )
-
-    const grokResponse = response.data.choices[0].message.content
-    console.log('Respuesta de Grok:', grokResponse)
-
-    // Identificar y extraer la consulta Prolog de la respuesta de Grok
-    const prologQueryFound = extractPrologQuery(grokResponse, prologQueries)
-
-    if (prologQueryFound) {
-      console.log('Consulta Prolog identificada:', prologQueryFound)
-
-      // Realizar la consulta a la API de Prolog
-      const prologResult = await lookupProlog(prologQueryFound)
-
-      // Interpretar y convertir la respuesta de Prolog a lenguaje natural
-      let naturalLanguageResponse = interpretPrologResult(
-        prologQueryFound,
-        prologResult
-      )
-      console.log('Respuesta en lenguaje natural:', naturalLanguageResponse)
-      return naturalLanguageResponse
-    } else {
-      console.log(
-        'No se pudo identificar una consulta de Prolog válida en la respuesta de Grok.'
-      )
-      return 'No se pudo entender tu consulta.'
-    }
+    return response.data
   } catch (error) {
-    console.error(
-      'Error al hacer la solicitud a Grok o al procesar la respuesta:',
-      error.response ? error.response.data : error.message
-    )
+    console.error('Error al consultar Prolog:', error.message)
     throw error
   }
 }
@@ -230,6 +155,51 @@ function interpretPrologResult(query, result) {
   }
 }
 
+// Función principal para manejar consultas del usuario
+async function handleUserQuery(userQuery) {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      store: true,
+      messages: [
+        { role: 'system', content: systemContent },
+        { role: 'user', content: userQuery },
+      ],
+    })
+
+    const gptResponse = completion.choices[0].message.content.trim()
+    console.log('Respuesta de ChatGPT:', gptResponse)
+
+    // Buscar una consulta Prolog válida en la respuesta de ChatGPT
+    const prologQueryFound = prologQueries.find((query) =>
+      gptResponse.includes(query)
+    )
+
+    if (prologQueryFound) {
+      console.log('Consulta Prolog identificada:', prologQueryFound)
+
+      // Realizar la consulta a la API de Prolog
+      const prologResult = await lookupProlog(gptResponse)
+
+      // Interpretar la respuesta de Prolog y convertirla a lenguaje natural
+      const naturalLanguageResponse = interpretPrologResult(
+        gptResponse,
+        prologResult
+      )
+      console.log('Respuesta en lenguaje natural:', naturalLanguageResponse)
+      return naturalLanguageResponse
+    } else {
+      console.log('No se pudo identificar una consulta de Prolog válida.')
+      return 'No se pudo entender tu consulta.'
+    }
+  } catch (error) {
+    console.error('Error al procesar la consulta del usuario:', error.message)
+    throw error
+  }
+}
+
 // Ejemplo de uso
-const userQuery = 'Hola Grok, ¿puedes decirme que los estudiantes que hay?'
-callGrok(userQuery).then(console.log)
+const userQuery = '¿Puedes decirme los estudiantes que hay?'
+handleUserQuery(userQuery).then((response) =>
+  console.log('Resultado final:', response)
+)
